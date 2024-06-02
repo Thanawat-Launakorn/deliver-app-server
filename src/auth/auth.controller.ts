@@ -11,6 +11,7 @@ import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt.guard';
+import { expiresIn } from './helpers/constants';
 
 @Controller('auth')
 export class AuthController {
@@ -20,9 +21,12 @@ export class AuthController {
   @Post('login')
   async login(@Req() req: Request, @Res() res: Response) {
     const user = await this.authService.login(req.user);
+    const { role } = req.user as any;
     return res.status(HttpStatus.OK).json({
+      expires_in: expiresIn,
       response_status: res.statusCode,
-      token: user,
+      access_token: user,
+      role,
     });
   }
 

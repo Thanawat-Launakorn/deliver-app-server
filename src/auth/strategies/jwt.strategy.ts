@@ -7,15 +7,13 @@ import { Injectable } from '@nestjs/common';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromHeader('id_token'),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
     });
   }
 
   validate(payload: any) {
-    console.log('Inside JWT Strategy Validate');
-    console.log(payload);
     return payload;
   }
 }

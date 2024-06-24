@@ -14,7 +14,7 @@ import { UserModule } from 'src/user/user.module';
     UserModule,
     PassportModule,
     JwtModule.register({
-      signOptions: { expiresIn: expiresIn },
+      signOptions: { expiresIn: expiresIn }, // expire token in 60 minute
       secret: jwtConstants.secret,
     }),
   ],

@@ -1,29 +1,29 @@
 import {
-  Controller,
   Get,
+  Res,
   Post,
   Body,
   Patch,
   Param,
   Delete,
-  Res,
-  HttpStatus,
   UseGuards,
-  UseInterceptors,
+  Controller,
+  HttpStatus,
   UploadedFile,
-  Put,
+  UseInterceptors,
 } from '@nestjs/common';
-import { CategoryService } from './category.service';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import * as fs from 'fs';
+import { join } from 'path';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-import { RolesGuard } from 'src/guards/roles.guard';
-import { Roles } from 'src/decorators/roles.decorator';
 import { Role } from 'src/auth/helpers/role';
+import { RolesGuard } from 'src/guards/roles.guard';
+import { CategoryService } from './category.service';
+import { Roles } from 'src/decorators/roles.decorator';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { unlink } from 'fs/promises';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('category')
 export class CategoryController {
@@ -98,7 +98,7 @@ export class CategoryController {
   ) {
     // Fetch the current category to get the existing image path
     const categoryTarget = await this.categoryService.findOne(+id);
-    console.log(categoryTarget)
+    console.log(categoryTarget);
     // Check if categoryTarget exists
     if (!categoryTarget) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -120,9 +120,7 @@ export class CategoryController {
           `${process.env.ENDPOINT}`,
           '',
         );
-        await unlink(`./${oldFilePath}`).catch((err) =>
-          console.error(`Failed to delete old image: ${err}`),
-        );
+        fs.unlink(`./${oldFilePath}`, () => {});
       }
     } else {
       console.log('Image is undefined, keeping existing image path');
@@ -145,8 +143,39 @@ export class CategoryController {
   @Roles([Role.ADMIN])
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete('delete/:id')
-  remove(@Param('id') id: string) {
-    console.log('id remove', id);
-    return this.categoryService.remove(+id);
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const categoryTarget = await this.categoryService.findOne(+id);
+
+      if (!categoryTarget) {
+        return res.status(HttpStatus.NOT_FOUND).json({
+          message: 'Category not found.',
+          response_status: res.statusCode,
+        });
+      }
+
+      const filePath = categoryTarget.image;
+      const fullFilePath = join(
+        process.cwd(),
+        'uploads',
+        filePath.split('/').pop(),
+      );
+
+      if (filePath && fs.existsSync(fullFilePath)) {
+        fs.unlinkSync(fullFilePath);
+        const response = await this.categoryService.remove(+id);
+        return res.status(HttpStatus.OK).json({
+          response,
+          response_status: res.statusCode,
+        });
+      }
+    } catch (err) {
+      console.error(`Error removing category or file: ${err}`);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'An error occurred while deleting the category',
+        error: err.message,
+        response_status: res.statusCode,
+      });
+    }
   }
 }

@@ -35,7 +35,7 @@ export class CategoryController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: './uploads/category',
         filename: (_, file, cb) => {
           const fileName = `${Date.now()}-${file.originalname}`;
           cb(null, fileName);
@@ -48,15 +48,12 @@ export class CategoryController {
     @UploadedFile() image: Express.Multer.File,
     @Body() createCategoryDto: CreateCategoryDto,
   ) {
-    const filePath = `${process.env.ENDPOINT}uploads/${image.filename}`;
-    const response = this.categoryService.create({
+    const filePath = `${process.env.ENDPOINT}uploads/category/${image.filename}`;
+    const response = await this.categoryService.create({
       image: filePath,
       ...createCategoryDto,
     });
-    const message = `create category ${createCategoryDto.category}`;
-    return res.status(HttpStatus.OK).json({
-      message,
-      filePath,
+    return res.status(HttpStatus.CREATED).json({
       response,
       response_status: res.statusCode,
     });
@@ -66,14 +63,14 @@ export class CategoryController {
   @Roles([Role.ADMIN, Role.CLIENT])
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll() {
-    return this.categoryService.findAll();
+    return await this.categoryService.findAll();
   }
   // detail category ===> 🍔
   @Get('detail/:id')
   @Roles([Role.ADMIN, Role.CLIENT])
   @UseGuards(JwtAuthGuard, RolesGuard)
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.categoryService.findOne(+id);
   }
 
   @Patch('update/:id')
@@ -82,7 +79,7 @@ export class CategoryController {
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
-        destination: './uploads',
+        destination: './uploads/category',
         filename: (req, file, cb) => {
           const fileName = `${Date.now()}-${file.originalname}`;
           cb(null, fileName);
@@ -98,7 +95,6 @@ export class CategoryController {
   ) {
     // Fetch the current category to get the existing image path
     const categoryTarget = await this.categoryService.findOne(+id);
-    console.log(categoryTarget);
     // Check if categoryTarget exists
     if (!categoryTarget) {
       return res.status(HttpStatus.NOT_FOUND).json({
@@ -112,7 +108,7 @@ export class CategoryController {
 
     // If a new image is provided, update the filePath
     if (image) {
-      filePath = `${process.env.ENDPOINT}uploads/${image.filename}`;
+      filePath = `${process.env.ENDPOINT}uploads/category/${image.filename}`;
 
       // Optional: Delete the old image file from the server
       if (categoryTarget.image && categoryTarget.image !== filePath) {
@@ -157,7 +153,7 @@ export class CategoryController {
       const filePath = categoryTarget.image;
       const fullFilePath = join(
         process.cwd(),
-        'uploads',
+        'uploads/category',
         filePath.split('/').pop(),
       );
 

@@ -12,15 +12,15 @@ export class CategoryService {
     private readonly categoryRepository: Repository<Category>,
   ) {}
   async create(createCategoryDto: CreateCategoryDto) {
-    return this.categoryRepository.save(createCategoryDto);
+    return await this.categoryRepository.save(createCategoryDto);
   }
 
-  findAll() {
-    return this.categoryRepository.find();
+  async findAll() {
+    return await this.categoryRepository.find();
   }
 
-  findOne(id: number) {
-    return this.categoryRepository.findOneBy({ id });
+  async findOne(id: number) {
+    return await this.categoryRepository.findOneBy({ id });
   }
 
   async update(id: number, updateCategoryDto: UpdateCategoryDto) {
@@ -28,8 +28,8 @@ export class CategoryService {
     if (!category) {
       throw new NotFoundException(`Category with ID ${id} not found`);
     }
-    console.log('categoryService update =>', updateCategoryDto);
-    return this.categoryRepository.update(id, updateCategoryDto);
+    await this.categoryRepository.update(id, updateCategoryDto);
+    return { updated: true };
   }
 
   async remove(id: number) {

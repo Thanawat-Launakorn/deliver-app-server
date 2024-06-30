@@ -21,6 +21,9 @@ export class Product {
   @Column()
   price: number;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  image: string;
+
   @Column()
   category_id: number;
 

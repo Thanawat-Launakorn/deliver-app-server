@@ -1,4 +1,5 @@
 import * as path from 'path';
+import * as express from 'express';
 import { AppModule } from './app.module';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -29,7 +30,9 @@ async function bootstrap() {
     },
   });
 
-  app.useStaticAssets(path.join(__dirname, '../uploads'));
+  // app.useStaticAssets(path.join(__dirname, '../uploads'));
+
+  app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
   await app.listen(3000);
 }

@@ -23,6 +23,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { join } from 'path';
 
 @Controller('product')
 export class ProductController {
@@ -52,7 +53,7 @@ export class ProductController {
       image: filePath,
       ...createProductDto,
     });
-    return res.status(HttpStatus.OK).json({
+    return res.status(HttpStatus.CREATED).json({
       response,
       response_status: res.statusCode,
     });
@@ -68,8 +69,8 @@ export class ProductController {
   @Get('detail/:id')
   @Roles([Role.ADMIN, Role.CLIENT])
   @UseGuards(JwtAuthGuard, RolesGuard)
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.productService.findOne(+id);
   }
 
   @Get('category/:id')
@@ -136,8 +137,45 @@ export class ProductController {
     });
   }
 
+  @Roles([Role.ADMIN])
   @Delete('delete/:id')
-  remove(@Param('id') id: string) {
-    return this.productService.remove(+id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async remove(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const productTarget = await this.productService.findOne(+id);
+
+      if (!productTarget) {
+        return res.status(HttpStatus.NOT_FOUND).json({
+          message: 'Product not found.',
+          response_status: res.statusCode,
+        });
+      }
+
+      const filePath = productTarget.image;
+      const fullFilePath = join(  
+        process.cwd(),
+        'uploads/product',
+        filePath.split('/').pop(),
+      );
+
+      console.log('fullfilepath ==>', fullFilePath)
+
+      if (filePath && fs.existsSync(fullFilePath)) {
+        fs.unlinkSync(fullFilePath);
+        const response = await this.productService.remove(+id);
+        return res.status(HttpStatus.OK).json({
+          response,
+          response_status: res.statusCode,
+        });
+      }
+    } catch (err) {
+      console.error(`Error removing product or file: ${err}`);
+      return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        message: 'An error occurred while deleting the product',
+        error: err.message,
+        response_status: res.statusCode,
+      });
+    }
+    return await this.productService.remove(+id);
   }
 }

@@ -54,8 +54,21 @@ export class OrderService {
     });
   }
 
+  async findOrderAll() {
+    return await this.orderItemRepository.find({
+      relations: {
+        order: true,
+        product: true,
+      },
+    });
+  }
+
   async findOne(id: number) {
     return await this.orderRepository.findOneBy({ id });
+  }
+
+  async findOrderUser(userId: number) {
+    return await this.orderRepository.findOneBy({ user_id: userId });
   }
 
   async remove(id: number) {

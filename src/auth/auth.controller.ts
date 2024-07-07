@@ -21,12 +21,13 @@ export class AuthController {
   @Post('login')
   async login(@Req() req: Request, @Res() res: Response) {
     const user = await this.authService.login(req.user);
-    const { role } = req.user as any;
+    const { role, userId } = req.user as any;
     return res.status(HttpStatus.OK).json({
       expires_in: expiresIn,
       response_status: res.statusCode,
       access_token: user,
       role,
+      userId,
     });
   }
 

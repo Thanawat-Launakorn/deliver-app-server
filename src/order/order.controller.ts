@@ -43,6 +43,28 @@ export class OrderController {
     });
   }
 
+  @Get('all/orderItem')
+  @Roles([Role.CLIENT])
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findOrderAll(@Res() res: Response) {
+    const response = await this.orderService.findOrderAll();
+    return res.status(HttpStatus.OK).json({
+      response,
+      response_status: res.statusCode,
+    })
+  }
+
+  @Get('user/:id')
+  @Roles([Role.CLIENT])
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findUserOrder(@Param('userId') userId: number, @Res() res: Response) {
+    const response = await this.orderService.findOrderUser(userId);
+    return res.status(HttpStatus.OK).json({
+      response,
+      response_status: res.statusCode,
+    });
+  }
+
   @Get('detail/:id')
   @Roles([Role.CLIENT])
   @UseGuards(JwtAuthGuard, RolesGuard)

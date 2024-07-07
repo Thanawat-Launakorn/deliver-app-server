@@ -1,3 +1,4 @@
+import { Role } from 'src/auth/helpers/role';
 import {
   Column,
   CreateDateColumn,
@@ -9,13 +10,16 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  userId: number;
 
   @Column({ unique: true })
   email: string;
 
   @Column()
   password: string;
+
+  @Column({ default: Role.CLIENT })
+  role: Role;
 
   @CreateDateColumn({ name: 'created_at' })
   created_at: Date;

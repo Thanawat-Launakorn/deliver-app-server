@@ -1,8 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Role } from 'src/auth/helpers/role';
+import { CreateUserDto } from './dto/create-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+  ) {}
   private readonly users = [
     {
       userId: 1,
@@ -24,7 +32,20 @@ export class UserService {
     },
   ];
 
+  async create(createUserDto: CreateUserDto) {
+    return await this.userRepository.save(createUserDto);
+  }
+
+  async findAll() {
+    return await this.userRepository.find({});
+  }
+
   async findOne(email: string) {
     return this.users.find((user) => user.email === email);
+  }
+
+  async remove(id: number) {
+    await this.userRepository.delete(id);
+    return { deleted: true };
   }
 }

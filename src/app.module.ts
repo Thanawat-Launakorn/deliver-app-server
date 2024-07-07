@@ -12,6 +12,11 @@ import { ProductModule } from './product/product.module';
 import { Product } from './product/entities/product.entity';
 import { CategoryModule } from './category/category.module';
 import { Category } from './category/entities/category.entity';
+import { OrderModule } from './order/order.module';
+import { AddressModule } from './address/address.module';
+import { Address } from './address/entities/address.entity';
+import { Order } from './order/entities/order.entity';
+import { OrderItem } from './order/entities/orderItem.entity';
 
 @Module({
   imports: [
@@ -27,13 +32,15 @@ import { Category } from './category/entities/category.entity';
       username: 'root',
       password: 'au586425',
       database: 'nanaservice',
-      entities: [User, Category, Product],
+      entities: [User, Category, Product, Address, Order, OrderItem],
       synchronize: true,
     }),
     AuthModule,
     UserModule,
     CategoryModule,
     ProductModule,
+    OrderModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

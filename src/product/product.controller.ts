@@ -13,6 +13,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import * as fs from 'fs';
+import { join } from 'path';
 import { Response } from 'express';
 import { diskStorage } from 'multer';
 import { Role } from 'src/auth/helpers/role';
@@ -23,7 +24,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { join } from 'path';
 
 @Controller('product')
 export class ProductController {

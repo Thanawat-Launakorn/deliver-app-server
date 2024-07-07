@@ -173,5 +173,13 @@ export class CategoryController {
         response_status: res.statusCode,
       });
     }
+
+    const response = await this.categoryService.remove(+id);
+    return res.status(HttpStatus.OK).json({
+      response,
+      response_status: res.statusCode,
+    });
   }
+
+
 }
